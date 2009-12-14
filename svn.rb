@@ -18,16 +18,31 @@ class Svn < CampfireBot::Plugin
 
   # respond to checkjira command-- same as interval except we answer with 'no issues found' if 
   def checksvn_command(msg)
-    msg.speak "no new commits since I last checked #{@lastlast} ago" if !check_svn(msg)
+    results = check_svn(msg)
+    if results.nil?
+      msg.speak "Sorry, there was an error connecting to SVN"
+    elsif results == false
+      msg.speak "no new commits since I last checked #{@lastlast} ago" 
+    end
   end
   
+  # checks svn and pastes the results to campfire
+  # returns true if new commits were seen
+  # returns false if no commit was found
+  # returns nil if we encountered an error
   def check_svn(msg)
     
     saw_a_commit = false
     old_cache = Marshal::load(Marshal.dump(@cached_revisions)) # since ruby doesn't have deep copy
     
-    @lastlast = time_ago_in_words(@last_checked)
     commits = fetch_svn_urls
+
+    # there was an error condition of some kind 
+    if !commits
+      return nil;
+    end
+    
+    @lastlast = time_ago_in_words(@last_checked)
     
     commits.reverse.each do |commit|
       # p commit
@@ -60,6 +75,8 @@ class Svn < CampfireBot::Plugin
   protected
   
   # fetch jira url and return a list of commit Hashes
+  # returns a hash of commits
+  # returns false if an error is encountered
   def fetch_svn_urls()
     urls = bot.config['svn_urls']
     commits = []
@@ -75,6 +92,7 @@ class Svn < CampfireBot::Plugin
 
       rescue Exception => e
         log "error connecting to svn: #{e.message}"
+        return false
       end
     end
     return commits
