@@ -30,7 +30,7 @@ class Svn < CampfireBot::Plugin
     commits = fetch_svn_urls
     
     commits.each do |commit|
-      p commit
+      # p commit
       if new?(commit, old_cache)
         saw_a_commit = true
 
