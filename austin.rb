@@ -3,9 +3,9 @@ require 'hpricot'
 
 class Austin < CampfireBot::Plugin
   BASE_URL = 'http://www.imdb.com/character/ch0002425/quotes'
-  
+
   on_command 'austin', :austin
-  
+
   def austin(msg)
     doc = Hpricot(open(BASE_URL))
     chunks = []
@@ -20,10 +20,10 @@ class Austin < CampfireBot::Plugin
     quote.gsub!(/ {2,}/, " ")
     quote.gsub!(/<\/?[^>]*>/, "")
     quote.split("\n")
-    
-    quote.each {|l| msg.speak l}
-    
+
+    quote.each {|l| msg['room'].speak l}
+
   rescue
-    msg.speak 'Austin Powers: Yeah, baby, yeah'
+    msg['room'].speak 'Austin Powers: Yeah, baby, yeah'
   end
 end
