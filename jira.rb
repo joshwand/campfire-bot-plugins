@@ -17,8 +17,7 @@ class Jira < CampfireBot::Plugin
 
   # respond to checkjira command-- same as interval except we answer with 'no issues found' if 
   def checkjira_command(msg)
-    lastlast = time_ago_in_words(@last_checked)
-    msg.speak "no new issues since I last checked #{lastlast} ago" if !check_jira(msg)
+    msg.speak "no new issues since I last checked #{lastlast} ago" if check_jira(msg)
   end
   
   def check_jira(msg)
