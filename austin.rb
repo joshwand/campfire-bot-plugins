@@ -21,9 +21,9 @@ class Austin < CampfireBot::Plugin
     quote.gsub!(/<\/?[^>]*>/, "")
     quote.split("\n")
 
-    quote.each {|l| msg['room'].speak l}
+    quote.each {|l| msg.speak l}
 
   rescue
-    msg['room'].speak 'Austin Powers: Yeah, baby, yeah'
+    msg.speak 'Austin Powers: Yeah, baby, yeah'
   end
 end
