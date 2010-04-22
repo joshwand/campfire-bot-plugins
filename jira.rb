@@ -20,7 +20,7 @@ class Jira < CampfireBot::Plugin
   def checkjira_command(msg)
     begin
       msg.speak "no new issues since I last checked #{@lastlast} ago" if !check_jira(msg)
-    rescue Exception => e
+    rescue 
       msg.speak "sorry, we had trouble connecting to JIRA."
     end
   end
