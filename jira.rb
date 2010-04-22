@@ -64,7 +64,7 @@ class Jira < CampfireBot::Plugin
       xmldata = open(bot.config['jira_url']).read
       doc = REXML::Document.new(xmldata)
       
-      raise Exception if doc.nil?
+      raise Exception.new("response had no content") if doc.nil?
       doc.elements.inject('rss/channel/item', []) do |tix, element|
       tix.push(parse_ticket_info(element))
     end
