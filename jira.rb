@@ -18,7 +18,11 @@ class Jira < CampfireBot::Plugin
 
   # respond to checkjira command-- same as interval except we answer with 'no issues found' if there are no issues
   def checkjira_command(msg)
-    msg.speak "no new issues since I last checked #{@lastlast} ago" if !check_jira(msg)
+    begin
+      msg.speak "no new issues since I last checked #{@lastlast} ago" if !check_jira(msg)
+    rescue Exception => e
+      msg.speak "sorry, we had trouble connecting to JIRA."
+    end
   end
   
   def check_jira(msg)
@@ -27,8 +31,10 @@ class Jira < CampfireBot::Plugin
     old_cache = Marshal::load(Marshal.dump(@cached_ids)) # since ruby doesn't have deep copy
     
     @lastlast = time_ago_in_words(@last_checked)
+
     tix = fetch_jira_url
-    
+    raise if tix.nil?
+      
     tix.each do |ticket|
       if seen?(ticket, old_cache)
         saw_an_issue = true
@@ -57,14 +63,14 @@ class Jira < CampfireBot::Plugin
       log "checking jira for new issues..."
       xmldata = open(bot.config['jira_url']).read
       doc = REXML::Document.new(xmldata)
+      
+      raise Exception if doc.nil?
+      doc.elements.inject('rss/channel/item', []) do |tix, element|
+      tix.push(parse_ticket_info(element))
+    end
     rescue Exception => e
       log "error connecting to jira: #{e.message}"
     end
-      
-    doc.elements.inject('rss/channel/item', []) do |tix, element|
-      tix.push(parse_ticket_info(element))
-    end
-    
   end
   
   # extract ticket hash from individual xml element
