@@ -14,6 +14,7 @@ class Svn < CampfireBot::Plugin
     @cached_revisions = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
     @urls = bot.config['svn_urls']
+    @log = Logging.logger["CampfireBot::Plugin::Svn"]
   end
 
   # respond to checkjira command-- same as interval except we answer with 'no issues found' if 
@@ -46,13 +47,13 @@ class Svn < CampfireBot::Plugin
         end
         
         msg.paste(messagetext)
-        log messagetext
+        @log.info messagetext
           
       end
     end
 
     @last_checked = Time.now
-    log "no new commits." if !saw_a_commit
+    @log.info "no new commits." if !saw_a_commit
   
     saw_a_commit
   end
@@ -65,7 +66,7 @@ class Svn < CampfireBot::Plugin
     commits = []
     urls.each do |url|
       begin
-        log "checking #{url} for new commits..."
+        @log.info "checking #{url} for new commits..."
         xmldata = `svn log --xml -v --limit 15 #{url}`
         doc = REXML::Document.new(xmldata)
       
@@ -74,7 +75,7 @@ class Svn < CampfireBot::Plugin
         end
 
       rescue Exception => e
-        log "error connecting to svn: #{e.message}"
+        @log.error "error connecting to svn: #{e.message}"
       end
     end
     return commits
@@ -122,10 +123,6 @@ class Svn < CampfireBot::Plugin
     end
   end
   
-  # log
-  def log(message)
-    puts "#{Time.now} | #{BOT_ENVIRONMENT} | SVN Plugin | #{message}"
-  end
   
   
   # 

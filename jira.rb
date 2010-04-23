@@ -14,6 +14,7 @@ class Jira < CampfireBot::Plugin
     @data_file  = File.join(BOT_ROOT, 'tmp', "jira-#{BOT_ENVIRONMENT}.yml")
     @cached_ids = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
+    @log = Logging.logger["CampfireBot::Plugin::Jira"]
   end
 
   # respond to checkjira command-- same as interval except we answer with 'no issues found' if there are no issues
@@ -44,13 +45,13 @@ class Jira < CampfireBot::Plugin
   
         messagetext = "#{ticket[:type]} - #{ticket[:title]} - #{ticket[:link]} - reported by #{ticket[:reporter]} - #{ticket[:priority]}"
         msg.speak(messagetext)
-        log messagetext
+        @log.info messagetext
           
       end
     end
 
     @last_checked = Time.now
-    log "no new issues." if !saw_an_issue
+    @log.info "no new issues." if !saw_an_issue
   
     saw_an_issue
   end
@@ -60,7 +61,7 @@ class Jira < CampfireBot::Plugin
   # fetch jira url and return a list of ticket Hashes
   def fetch_jira_url()
     begin
-      log "checking jira for new issues..."
+      @log.info "checking jira for new issues..."
       xmldata = open(bot.config['jira_url']).read
       doc = REXML::Document.new(xmldata)
       
@@ -69,7 +70,7 @@ class Jira < CampfireBot::Plugin
       tix.push(parse_ticket_info(element))
     end
     rescue Exception => e
-      log "error connecting to jira: #{e.message}"
+      @log.error "error connecting to jira: #{e.message}"
     end
   end
   
@@ -118,11 +119,6 @@ class Jira < CampfireBot::Plugin
     File.open(@data_file, 'w') do |out|
       YAML.dump(cache, out)
     end
-  end
-  
-  # log
-  def log(message)
-    puts "#{Time.now} | #{BOT_ENVIRONMENT} | JIRA Plugin | #{message}"
   end
   
   
