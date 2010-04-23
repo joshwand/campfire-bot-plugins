@@ -9,7 +9,7 @@ class Svn < CampfireBot::Plugin
   
   
   def initialize
-    log "initializing... "
+    # log "initializing... "
     @data_file  = File.join(BOT_ROOT, 'tmp', "svn-#{BOT_ENVIRONMENT}-#{bot.config['room']}.yml")
     @cached_revisions = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
@@ -30,7 +30,7 @@ class Svn < CampfireBot::Plugin
     commits = fetch_svn_urls
     
     commits.each do |commit|
-      p commit
+      # p commit
       if new?(commit, old_cache)
         saw_an_issue = true
 
@@ -124,7 +124,7 @@ class Svn < CampfireBot::Plugin
   
   # log
   def log(message)
-    puts "#{Time.now} | #{bot.config['room']} | SVN Plugin | #{message}"
+    puts "#{Time.now} | #{BOT_ENVIRONMENT} | SVN Plugin | #{message}"
   end
   
   

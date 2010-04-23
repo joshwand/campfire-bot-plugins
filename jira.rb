@@ -10,7 +10,7 @@ class Jira < CampfireBot::Plugin
   
   
   def initialize
-    log "initializing... "
+    # log "initializing... "
     @data_file  = File.join(BOT_ROOT, 'tmp', "jira-#{BOT_ENVIRONMENT}.yml")
     @cached_ids = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
