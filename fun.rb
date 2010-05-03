@@ -3,6 +3,10 @@ class Fun < CampfireBot::Plugin
   on_message    Regexp.new("^#{bot.config['nickname']},\\s+(should|can|will|shall) (i|he|she|we|they) do it\\?", Regexp::IGNORECASE), :do_or_do_not
   on_message    Regexp.new("^(good morning|morning|m0ink|hello|hi|hey|whassup|what's up|yo|hola|ola|'sup|sup)(,)*\\s*(#{bot.config['nickname']}).*$", Regexp::IGNORECASE), :greet
   on_message  /(how's it|how are|how're) (ya |you )*(going|doing|doin).*/, :howareya
+  on_command    "blame", :blame
+  on_command    "trout", :trout
+  on_command    "slap", :trout
+  on_command    "troutslap", :trout
   # on_speaker    'Tim R.',           :agree_with_tim
   # on_message    /undo it/i,         :do_it
   # on_message    /(^|\s)do it/i,     :undo_it
@@ -43,5 +47,47 @@ class Fun < CampfireBot::Plugin
     messages = ["just great", "peachy", "mas o menos", 
     	 "you know how it is", "eh, ok", "pretty good. how about you?"]
     m.speak(messages[rand(messages.size)])
+  end
+  
+  def blame(m)
+    # TODO: capture user-submitted entries to a yaml file and regurgitate them
+    # TODO: put all the default ones in a separate yaml
+    if m[:message].strip.length > 0
+      selected_user_name = m[:message].strip
+    else
+      users = m[:room].users.delete_if {|u| u[:name] == bot.campfire.me[:name]}.map {|u| u[:name]}
+      others = ["nobody", "my", "Microsoft", "Steve Jobs", "the terrorists", "your", 
+                "Project Management", "Development", "Management", "Corporate", "Cartman", "the user", 
+                "the liberal media", "Wall Street"]
+      
+      # mostly blame the other users
+      if rand(10) >= 2
+        blamed = users.rand
+      else 
+        blamed = others.rand
+      end
+      
+    end
+    
+    case blamed
+    when "nobody"
+      blamed = "It's nobody's fault"
+    when "your", "my"
+      blamed = "It's all #{blamed} fault"
+    else
+      blamed = "It's all #{blamed}'s fault"
+    end
+   
+    m.speak blamed
+  end
+  
+  def trout(m)
+    if m[:message].strip.length > 0
+      selected_user_name = m[:message].strip
+    else
+      users = m[:room].users.map{|u| u[:name] }
+      selected_user_name = users.rand
+    end
+    m.speak("#{m[:person]} slaps #{selected_user_name} #{["upside the head", "in the face", "on the rear", "where it counts", "in the knees", "ineffectually", "in the elbow", "on the funny bone", "in the ear", "on the nose", "in the teeth"].rand} with a #{%w(good-sized large decaying moldy spiked sabre-toothed surprised disappointed dramatic enraged rabid bug-eyed rotten foul-smelling demonic cluestick-holding).rand} trout")
   end
 end
