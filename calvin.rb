@@ -2,15 +2,6 @@ require 'open-uri'
 require 'hpricot'
 require 'tempfile'
 
-# From http://blog.nicksieger.com/articles/2008/03/14/monkey-patching-is-part-of-the-diy-culture
-Tempfile.class_eval do
-  # Make tempfiles use the extension of the basename. This is important for images.
-  def make_tmpname(basename, n)
-    ext = nil
-    sprintf("%s%d-%d%s", basename.to_s.gsub(/\.\w+$/) { |s| ext = s; '' }, $$, n, ext)
-  end
-end
-
 class Calvin < CampfireBot::Plugin
   BASE_URL    = 'http://www.marcellosendos.ch/comics/ch/'
   START_DATE  = Date.parse('1984-08-14')
@@ -28,16 +19,7 @@ class Calvin < CampfireBot::Plugin
       fetch_random
     end
     
-    # Now download it
-    file = Tempfile.new("calvin-#{comic.split('/').last}")
-    file.write(open(comic).read)
-    file.flush
-    
-    # Upload it
-    msg.upload(file.path)
-    
-    # And remove the tempfile
-    file.close!
+    msg.speak(comic)
   end
   
   private

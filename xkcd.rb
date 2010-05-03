@@ -2,15 +2,6 @@ require 'open-uri'
 require 'hpricot'
 require 'tempfile'
 
-# From http://blog.nicksieger.com/articles/2008/03/14/monkey-patching-is-part-of-the-diy-culture
-Tempfile.class_eval do
-  # Make tempfiles use the extension of the basename. This is important for images.
-  def make_tmpname(basename, n)
-    ext = nil
-    sprintf("%s%d-%d%s", basename.to_s.gsub(/\.\w+$/) { |s| ext = s; '' }, $$, n, ext)
-  end
-end
-
 class Xkcd < CampfireBot::Plugin
   BASE_URL = 'http://xkcd.com/'
   
@@ -29,19 +20,8 @@ class Xkcd < CampfireBot::Plugin
       fetch_random
     end
     
-    # Now download it
-    file = Tempfile.new("xkcd-#{comic['src'].split('/').last}")
-    file.write(open(comic['src']).read)
-    file.flush
-    
-    puts file.path 
-    
-    # Upload it
-    msg.upload(file.path)
-    msg.speak(comic['title'])
-    
-    # And remove the tempfile
-    file.close!
+    msg.speak comic['src']
+    msg.speak comic['title']
   end
   
   private
