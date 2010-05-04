@@ -14,6 +14,7 @@ class Fun < CampfireBot::Plugin
 
   def initialize
     @last_agreed = 20.minutes.ago
+    @log = Logging.logger["CampfireBot::Plugin::Fun"]
   end
   
   def say(m)
@@ -53,7 +54,7 @@ class Fun < CampfireBot::Plugin
     # TODO: capture user-submitted entries to a yaml file and regurgitate them
     # TODO: put all the default ones in a separate yaml
     if m[:message].strip.length > 0
-      selected_user_name = m[:message].strip
+      blamed = m[:message].strip
     else
       users = m[:room].users.delete_if {|u| u[:name] == bot.campfire.me[:name]}.map {|u| u[:name]}
       others = ["nobody", "my", "Microsoft", "Steve Jobs", "the terrorists", "your", 
@@ -71,14 +72,15 @@ class Fun < CampfireBot::Plugin
     
     case blamed
     when "nobody"
-      blamed = "It's nobody's fault"
+      blamestring = "It's nobody's fault"
     when "your", "my"
-      blamed = "It's all #{blamed} fault"
+      blamestring = "It's all #{blamed} fault"
     else
-      blamed = "It's all #{blamed}'s fault"
+      blamestring = "It's all #{blamed}'s fault"
+      blamestring = "It's all #{blamed}' fault" if blamed[-1].chr == "s"
     end
    
-    m.speak blamed
+    m.speak blamestring
   end
   
   def trout(m)
