@@ -7,8 +7,8 @@ class Bruce < CampfireBot::Plugin
   
   def fail(msg)
     # Scrape random fail
-    fail = (Hpricot(open('http://www.schneierfacts.com/'))/'p.fact').first
-    msg.speak(fail.inner_html)
+    bruce = (Hpricot(open('http://www.schneierfacts.com/'))/'p.fact').first
+    msg.speak(CGI.unescapeHTML(bruce.inner_html))
   rescue => e
     msg.speak e
   end
