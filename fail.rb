@@ -7,7 +7,7 @@ class Fail < CampfireBot::Plugin
   
   def fail(msg)
     # Scrape random fail
-    fail = (Hpricot(open('http://failblog.org/?random#top'))/'div.snap_preview img').first
+    fail = (Hpricot(open('http://failblog.org/?random#top'))/'div.entry img').first
 
     msg.speak(fail['src'])
   rescue => e
