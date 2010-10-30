@@ -11,7 +11,7 @@ class LolCats < CampfireBot::Plugin
   
   def lolcats(msg)
     # Scrape random lolcat
-    lolcat = (Hpricot(open('http://icanhascheezburger.com/?random#top'))/'div.snap_preview img').first['src']
+    lolcat = (Hpricot(open('http://icanhascheezburger.com/?random#top'))/'div.entry img').first['src']
     msg.speak(lolcat)
   end
 end
