@@ -4,7 +4,7 @@ class Fun < CampfireBot::Plugin
   on_command    'figlet', :figlet
   
   def figlet(msg)
-    output = `#{Escape.shell_command(['figlet', '--', m[:message]])}`
+    output = `#{Escape.shell_command(['figlet', '--', msg[:message]])}`
     msg.paste output
   end
 end
