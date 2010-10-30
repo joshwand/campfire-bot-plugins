@@ -3,8 +3,8 @@ require 'hpricot'
 require 'tempfile'
 
 class Calvin < CampfireBot::Plugin
-  BASE_URL    = 'http://www.marcellosendos.ch/comics/ch/'
-  START_DATE  = Date.parse('1984-08-14')
+  BASE_URL    = 'http://marcel-oehler.marcellosendos.ch/comics/ch/'
+  START_DATE  = Date.parse('1985-11-18')
   END_DATE    = Date.parse('1995-12-31') # A sad day
   
   on_command 'calvin', :calvin
