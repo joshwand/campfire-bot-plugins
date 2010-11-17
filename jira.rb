@@ -71,19 +71,20 @@ class Jira < CampfireBot::Plugin
     end
     rescue Exception => e
       @log.error "error connecting to jira: #{e.message}"
+      # @log.error "#{e.backtrace}"
     end
   end
   
   # extract ticket hash from individual xml element
   def parse_ticket_info(xml_element)
-    id = xml_element.elements['key'].text
-    id, spacekey = split_spacekey_and_id(id)
+    id = xml_element.elements['key'].text rescue ""
+    id, spacekey = split_spacekey_and_id(id) rescue ""
     
-    link = xml_element.elements['link'].text
-    title = xml_element.elements['title'].text
-    reporter = xml_element.elements['reporter'].text
-    type = xml_element.elements['type'].text
-    priority = xml_element.elements['priority'].text
+    link = xml_element.elements['link'].text rescue ""
+    title = xml_element.elements['title'].text rescue ""
+    reporter = xml_element.elements['reporter'].text rescue ""
+    type = xml_element.elements['type'].text rescue ""
+    priority = xml_element.elements['priority'].text rescue ""
     
     return {
       :spacekey => spacekey,
