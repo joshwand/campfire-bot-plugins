@@ -2,12 +2,26 @@ require 'open-uri'
 require 'hpricot'
 require 'tempfile'
 
+##
+# JIRA plugin
+# 
+# checks JIRA for new issues and posts them to the room
+# 
+# in your config.yml you can either specify a single URL or a list of URLs, e.g.
+# 
+#   jira_url: http://your_jira_url
+#   # OR
+#   jira_url: 
+#     - http://your_jira_url
+#     - http://your_jira_url2
+# 
+
+
 class Jira < CampfireBot::Plugin
   
   at_interval 3.minutes, :check_jira
   on_command 'checkjira', :checkjira_command
   on_command 'jira', :checkjira_command
-  
   
   def initialize
     # log "initializing... "
@@ -60,19 +74,33 @@ class Jira < CampfireBot::Plugin
   
   # fetch jira url and return a list of ticket Hashes
   def fetch_jira_url()
-    begin
-      @log.info "checking jira for new issues..."
-      xmldata = open(bot.config['jira_url']).read
-      doc = REXML::Document.new(xmldata)
+    
+    jiraconfig = bot.config['jira_url']
+    
+    if jiraconfig.is_a?(Array)
+      searchurls = jiraconfig 
+    else 
+      searchurls = [jiraconfig]
+    end
+    
+    tix = []
       
-      raise Exception.new("response had no content") if doc.nil?
-      doc.elements.inject('rss/channel/item', []) do |tix, element|
-      tix.push(parse_ticket_info(element))
+    searchurls.each do |searchurl|
+      begin
+        @log.info "checking jira for new issues..."
+        xmldata = open(searchurl).read
+        doc = REXML::Document.new(xmldata)
+      
+        raise Exception.new("response had no content") if doc.nil?
+        doc.elements.inject('rss/channel/item', []) do |tix, element|
+        tix.push(parse_ticket_info(element))
+      end
+      rescue Exception => e
+        @log.error "error connecting to jira: #{e.message}"
+        # @log.error "#{e.backtrace}"
+      end
     end
-    rescue Exception => e
-      @log.error "error connecting to jira: #{e.message}"
-      # @log.error "#{e.backtrace}"
-    end
+    return tix
   end
   
   # extract ticket hash from individual xml element
