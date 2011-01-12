@@ -87,14 +87,13 @@ class Jira < CampfireBot::Plugin
       
     searchurls.each do |searchurl|
       begin
-        @log.info "checking jira for new issues..."
+        @log.info "checking jira for new issues... #{searchurl}"
         xmldata = open(searchurl).read
         doc = REXML::Document.new(xmldata)
-      
         raise Exception.new("response had no content") if doc.nil?
-        doc.elements.inject('rss/channel/item', []) do |tix, element|
-        tix.push(parse_ticket_info(element))
-      end
+        doc.elements.inject('rss/channel/item', tix) do |tix, element|
+          tix.push(parse_ticket_info(element))
+        end
       rescue Exception => e
         @log.error "error connecting to jira: #{e.message}"
         # @log.error "#{e.backtrace}"
