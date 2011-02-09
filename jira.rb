@@ -1,7 +1,8 @@
 require 'open-uri'
 require 'hpricot'
 require 'tempfile'
-
+require 'active_support/core_ext'
+require 'rexml/document'
 ##
 # JIRA plugin
 # 
