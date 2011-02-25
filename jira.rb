@@ -62,6 +62,7 @@ class Jira < CampfireBot::Plugin
   
         messagetext = "#{ticket[:type]} - #{ticket[:title]} - #{ticket[:link]} - reported by #{ticket[:reporter]} - #{ticket[:priority]}"
         msg.speak(messagetext)
+        msg.play("vuvuzela") if ticket[:priority] == "Blocker"
         @log.info messagetext
           
       end
