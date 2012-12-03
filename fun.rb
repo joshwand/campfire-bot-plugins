@@ -1,6 +1,7 @@
 class Fun < CampfireBot::Plugin
   on_command    'say',              :say
   on_message    Regexp.new("^#{bot.config['nickname']},\\s+(should|can|will|shall) (i|he|she|we|they) do it\\?", Regexp::IGNORECASE), :do_or_do_not
+  on_message    Regexp.new("^.*(thank you|thanks|thx|danke).*(,)?\\s*(#{bot.config['nickname']}).*$", Regexp::IGNORECASE), :welcome
   on_message    Regexp.new("^(good morning|morning|m0ink|hello|hi|hey|whassup|what's up|yo|hola|ola|'sup|sup)(,)*\\s*(#{bot.config['nickname']}).*$", Regexp::IGNORECASE), :greet
   on_message  /(how's it|how are|how're) (ya |you )*(going|doing|doin).*/, :howareya
   on_command    "blame", :blame
@@ -40,8 +41,16 @@ class Fun < CampfireBot::Plugin
   end
   
   def greet(m)
-    messages = ['Howdy', 'Wassup', 'Greets', 'Hello', 'Hey there', "It's a", 'Good day']
+    @log.debug "returning greet to #{m[:person].split(' ')[0]}"
+    messages = ['Howdy', 'Wassup', 'Greets', 'Hello', 'Hey there', 'Good day']
     m.speak("#{messages.choice} #{m[:person].split(' ')[0]}")
+  end
+
+  def welcome(m)
+    @log.debug "#{m[:person].split(' ')[0]} is most welcome"
+    messages = ["Ain't no thang", 'You got it', "You're welcome", 'My pleasure', "...whatev's",
+	"You're quite welcome", "I live to serve"]
+    m.speak("#{messages.choice} #{m[:person].split(' ')[0]}!")
   end
   
   def howareya(m)
