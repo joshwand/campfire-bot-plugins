@@ -8,38 +8,45 @@ class Fun < CampfireBot::Plugin
   on_command    "trout", :trout
   on_command    "slap", :trout
   on_command    "troutslap", :trout
-  # on_speaker    'Tim R.',           :agree_with_tim
+  # on_speaker    'Tim R.',           :agree_with
   # on_message    /undo it/i,         :do_it
   # on_message    /(^|\s)do it/i,     :undo_it
   # at_time       1.minute.from_now,  :do_it
 
   def initialize
-    @last_agreed = 20.minutes.ago
+    @last_agreed = 35.minutes.ago
+    @last_disagreed = 45.minutes.ago
     @log = Logging.logger["CampfireBot::Plugin::Fun"]
   end
-  
+
   def say(m)
     m.speak(m[:message])
   end
-  
+
   def do_it(m = nil)
     m.speak('Do it!')
   end
-  
+
   def undo_it(m)
     m.speak('Undo it!')
   end
-  
+
   def do_or_do_not(m)
     responses = ['Do it!', 'Don\'t do it!', 'Undo it!']
     m.speak(responses.choice)
   end
-  
-  def agree_with_tim(m)
-    m.speak('I agree with Tim.') unless @last_agreed > 15.minutes.ago
+
+  def agree_with(m)
+    m.speak("I agree with #{m[:person].split(' ')[0]}.") unless @last_agreed > 80.minutes.ago
     @last_agreed = Time.now
   end
-  
+
+  def disagree_with(m)
+    messages = ["I don't know about that", "hmmm, questionable", "Oh #{m[:person].split(' ')[0]}...", "hmmmph... hmmmph...", "doubtful...", "<sigh...>"]
+    m.speak(messages.choice) unless @last_disagreed > 90.minutes.ago
+    @last_disagreed = Time.now
+  end
+
   def greet(m)
     @log.debug "returning greet to #{m[:person].split(' ')[0]}"
     messages = ['Howdy', 'Wassup', 'Greets', 'Hello', 'Hey there', 'Good day']
