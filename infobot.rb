@@ -12,6 +12,8 @@ class Infobot < CampfireBot::Plugin
   # end
   
   def initialize
+    @bot_root = bot.config['bot_root'].nil? ? "/opt/campfire-bot" : \
+        bot.config['bot_root']
     # puts "entering initialize()"
     
   end
@@ -47,7 +49,7 @@ class Infobot < CampfireBot::Plugin
   
   def init
     # puts "entering init()"
-    YAML::load(File.read(File.join(BOT_ROOT, 'tmp', 'infobot.yml')))
+    YAML::load(File.read(File.join(@bot_root, 'tmp', 'infobot.yml')))
   end
   
   def reload(msg)
