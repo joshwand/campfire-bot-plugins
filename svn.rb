@@ -1,16 +1,22 @@
 require 'open-uri'
 require 'hpricot'
 require 'tempfile'
+require 'rexml/document'
+require 'addressable/uri'
 
 class Svn < CampfireBot::Plugin
-  
-  at_interval 20.minutes, :check_svn
-  on_command 'svn', :checksvn_command
-  
-  
+
+  #at_interval 20.minutes, :check_svn
+  #on_command 'checksvn', :checksvn_command
+  on_command 'svn', :lookup_commit_details
+
+
   def initialize
     # log "initializing... "
-    @data_file  = File.join(BOT_ROOT, 'tmp', "svn-#{BOT_ENVIRONMENT}-#{bot.config['room']}.yml")
+    @bot_root = bot.config['bot_root'].nil? ? "/opt/campfire-bot" : \
+        bot.config['bot_root']
+    @data_file  = File.join(@bot_root, 'tmp',
+        "svn-#{bot.environment_name}-#{bot.config['room']}.yml")
     @cached_revisions = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
     @urls = bot.config['svn_urls']
@@ -21,6 +27,28 @@ class Svn < CampfireBot::Plugin
   def checksvn_command(msg)
     msg.speak "no new commits since I last checked #{@lastlast} ago" if !check_svn(msg)
   end
+
+  # respond with details about a particular commit
+  def lookup_commit_details(msg)
+    rev = msg[:message]
+    commit = fetch_svn_commit(rev).first
+    messagetext = "#{commit[:author]} committed revision #{commit[:revision]} " +
+        "#{time_ago_in_words(commit[:date])} ago:\n"
+
+    messagetext += "\n#{commit[:message]}\n"
+    messagetext += "----\n"
+    commit[:paths].each do |path|
+        messagetext += path[:action] + " " + path[:path] + "\n"
+    end
+
+    msg.paste(messagetext)
+
+    messagetext = "More detail can be found at " + bot.config['svn_webui_url']
+    msg.speak(messagetext)
+
+    @log.info messagetext
+  end
+  
   
   def check_svn(msg)
     
@@ -33,12 +61,13 @@ class Svn < CampfireBot::Plugin
     commits.each do |commit|
       # p commit
       if new?(commit, old_cache)
-        saw_a_commit = true
+        saw_an_issue = true
 
         @cached_revisions = update_cache(commit, @cached_revisions) 
         flush_cache(@cached_revisions)
     
-        messagetext = "#{commit[:author]} committed revision #{commit[:revision]} #{time_ago_in_words(commit[:date])} ago on #{commit[:url]}:\n"
+        messagetext = "#{commit[:author]} committed revision #{commit[:revision]} " +
+          "#{time_ago_in_words(commit[:date])} ago on #{commit[:url]}:\n"
 
         messagetext += "\n#{commit[:message]}\n"
         messagetext += "----\n"
@@ -59,17 +88,44 @@ class Svn < CampfireBot::Plugin
   end
   
   protected
-  
+
+  # fetch jira url and return a single commit Hash
+  def fetch_svn_commit(rev)
+    url_str = bot.config['svn_root_url']
+    commit = []
+    begin
+      @log.info "checking #{url_str} for new commit..."
+
+      # https://username:password@svn.host.com:8080/svn/path/in/repo/
+      url = Addressable::URI.parse(url_str)
+
+      @log.debug PP.singleline_pp(url.to_hash, '')
+      xmldata = `svn log --xml -v -r #{rev} #{url.omit(:user, :password)}`
+      doc = REXML::Document.new(xmldata)
+    
+      doc.elements.inject('log/logentry', commit) do |commit, element|
+        commit.push({:url => url}.merge(parse_entry_info(element)))
+      end
+      @log.debug PP.singleline_pp(commit, '')
+
+    rescue Exception => e
+      @log.error "error connecting to svn: #{e.message}"
+    end
+    return commit
+  end
+
   # fetch jira url and return a list of commit Hashes
   def fetch_svn_urls()
     urls = bot.config['svn_urls']
-    svn_username = bot.config['svn_username']
-    svn_password = bot.config['svn_password']
     commits = []
-    urls.each do |url|
+    urls.each do |url_str|
       begin
-        @log.info "checking #{url} for new commits..."
-        xmldata = `svn log --xml -v --limit 15 #{url} --username #{svn_username} --password #{svn_password}`
+        @log.info "checking #{url_str} for new commits..."
+
+        # https://username:password@svn.host.com:8080/svn/path/in/repo/
+        url = Addressable::URI.parse(url_str)
+
+        xmldata = `svn log --username #{url.user} --password #{url.password} --xml -v --limit 15 #{url.omit(:user, :password)}`
         doc = REXML::Document.new(xmldata)
       
         doc.elements.inject('log/logentry', commits) do |commits, element|
@@ -82,8 +138,8 @@ class Svn < CampfireBot::Plugin
     end
     return commits
   end
-  
-  # extract commit hash from indivrevisionual xml element
+
+  # extract commit hash from individual revision xml element
   def parse_entry_info(xml_element)
     
     revision =   xml_element.attributes['revision']

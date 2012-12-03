@@ -1,47 +1,63 @@
 class Fun < CampfireBot::Plugin
   on_command    'say',              :say
   on_message    Regexp.new("^#{bot.config['nickname']},\\s+(should|can|will|shall) (i|he|she|we|they) do it\\?", Regexp::IGNORECASE), :do_or_do_not
+  on_message    Regexp.new("^.*(thank you|thanks|thx|danke).*(,)?\\s*(#{bot.config['nickname']}).*$", Regexp::IGNORECASE), :welcome
   on_message    Regexp.new("^(good morning|morning|m0ink|hello|hi|hey|whassup|what's up|yo|hola|ola|'sup|sup)(,)*\\s*(#{bot.config['nickname']}).*$", Regexp::IGNORECASE), :greet
   on_message  /(how's it|how are|how're) (ya |you )*(going|doing|doin).*/, :howareya
   on_command    "blame", :blame
   on_command    "trout", :trout
   on_command    "slap", :trout
   on_command    "troutslap", :trout
-  # on_speaker    'Tim R.',           :agree_with_tim
+  # on_speaker    'Tim R.',           :agree_with
   # on_message    /undo it/i,         :do_it
   # on_message    /(^|\s)do it/i,     :undo_it
   # at_time       1.minute.from_now,  :do_it
 
   def initialize
-    @last_agreed = 20.minutes.ago
+    @last_agreed = 35.minutes.ago
+    @last_disagreed = 45.minutes.ago
     @log = Logging.logger["CampfireBot::Plugin::Fun"]
   end
-  
+
   def say(m)
     m.speak(m[:message])
   end
-  
+
   def do_it(m = nil)
     m.speak('Do it!')
   end
-  
+
   def undo_it(m)
     m.speak('Undo it!')
   end
-  
+
   def do_or_do_not(m)
     responses = ['Do it!', 'Don\'t do it!', 'Undo it!']
     m.speak(responses.choice)
   end
-  
-  def agree_with_tim(m)
-    m.speak('I agree with Tim.') unless @last_agreed > 15.minutes.ago
+
+  def agree_with(m)
+    m.speak("I agree with #{m[:person].split(' ')[0]}.") unless @last_agreed > 80.minutes.ago
     @last_agreed = Time.now
   end
-  
+
+  def disagree_with(m)
+    messages = ["I don't know about that", "hmmm, questionable", "Oh #{m[:person].split(' ')[0]}...", "hmmmph... hmmmph...", "doubtful...", "<sigh...>"]
+    m.speak(messages.choice) unless @last_disagreed > 90.minutes.ago
+    @last_disagreed = Time.now
+  end
+
   def greet(m)
-    messages = ['Howdy', 'Wassup', 'Greets', 'Hello', 'Hey there', "It's a", 'Good day']
+    @log.debug "returning greet to #{m[:person].split(' ')[0]}"
+    messages = ['Howdy', 'Wassup', 'Greets', 'Hello', 'Hey there', 'Good day']
     m.speak("#{messages.choice} #{m[:person].split(' ')[0]}")
+  end
+
+  def welcome(m)
+    @log.debug "#{m[:person].split(' ')[0]} is most welcome"
+    messages = ["Ain't no thang", 'You got it', "You're welcome", 'My pleasure', "...whatev's",
+	"You're quite welcome", "I live to serve"]
+    m.speak("#{messages.choice} #{m[:person].split(' ')[0]}!")
   end
   
   def howareya(m)

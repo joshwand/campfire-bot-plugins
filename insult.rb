@@ -9,8 +9,11 @@ class Insult < CampfireBot::Plugin
     noun = noun()
     article = "a"
     article = "an" if (adj1[0] =~ /^[aeiou]/)
-    out = "#{msg[:message]}, you are nothing but a #{adj1} #{amount} of #{adj2} #{noun}"
- 
+    if msg[:message].strip.length > 0
+      out = "#{msg[:message]}, you are nothing but a #{adj1} #{amount} of #{adj2} #{noun}"
+    else
+      out = "#{adj1} #{amount} of #{adj2} #{noun}"
+    end
  
     msg.speak(out)
   end
