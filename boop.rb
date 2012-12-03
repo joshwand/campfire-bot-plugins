@@ -21,7 +21,7 @@ class Boop < CampfireBot::Plugin
   end
   
   def random_chatter(msg)
-    puts "random_chatter"
+    @log.info "random_chatter"
     msg.speak(generate_line)
   end
   
@@ -32,20 +32,20 @@ class Boop < CampfireBot::Plugin
   def load_transcripts(msg)
     msg.speak("Filling my brain with transcripts...")
     
-    puts "available transcripts - #{bot.room.available_transcripts.to_yaml}"
+    @log.info "available transcripts - #{bot.room.available_transcripts.to_yaml}"
     
     bot.room.available_transcripts.to_a.each do |date|
-      puts "loading transcript #{date}"
+      @log.info "loading transcript #{date}"
       
       transcript = bot.room.transcript(date)
       
       transcript.each do |message|
-        puts "message: #{message[:message]}"
+        @log.info "message: #{message[:message]}"
         
         filtered_text = strip_message(message)
         
         filtered_text.split("\n").each { |line| add_line(line) unless line.blank? }
-        filtered_text.split("\n").each { |line| puts "ACCEPTED: " + line unless line.blank? }
+        filtered_text.split("\n").each { |line| @log.info "ACCEPTED: " + line unless line.blank? }
         
       end
     end
