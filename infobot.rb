@@ -128,7 +128,7 @@ class Infobot < CampfireBot::Plugin
       result = "Okay, #{$2} is now #{$4}"
       result = "Okay, #{$2} are now #{$4}" if $2[-1].chr == "s"
       msg.speak(result)
-      File.open(File.join(BOT_ROOT, 'tmp', 'infobot.yml'), 'w') do |out|
+      File.open(File.join(@bot_root, 'tmp', 'infobot.yml'), 'w') do |out|
         out.flock(File::LOCK_EX)
         YAML.dump(@facts, out)
         @log.debug "Stored #{@facts.keys.count} facts to #{out}"
@@ -169,7 +169,7 @@ class Infobot < CampfireBot::Plugin
     @facts ||= init() || Hash.new
     if @facts.delete(msg[:message])
       @log.info "forgot #{msg[:message]}"
-      File.open(File.join(BOT_ROOT, 'tmp', 'infobot.yml'), 'w') do |out|
+      File.open(File.join(@bot_root, 'tmp', 'infobot.yml'), 'w') do |out|
         out.flock(File::LOCK_EX)
         YAML.dump(@facts, out)
         @log.debug "Stored #{@facts.keys.count} facts to #{out}"
