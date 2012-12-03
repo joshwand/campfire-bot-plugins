@@ -19,6 +19,8 @@ class Austin < CampfireBot::Plugin
     quote.gsub!(/^\s/, "")
     quote.gsub!(/ {2,}/, " ")
     quote.gsub!(/<\/?[^>]*>/, "")
+    quote.gsub!(/&#x27;/, "'")
+    quote.gsub!(/&#x22;/, '"')
     quote.split("\n")
 
     quote.each {|l| msg.speak l}
