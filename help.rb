@@ -6,8 +6,13 @@ class Help < CampfireBot::Plugin
   on_command 'help', :help
 
   def help(msg)
-    commands = CampfireBot::Plugin.registered_commands.map { |command| command.matcher.to_s + " " }
-    msg.speak("To address me, type \"#{bot.config['nickname']},\" and a command, or just !command. \n
-    Available commands: #{commands}")
+    commands = CampfireBot::Plugin.registered_commands.map \
+        { |command| command.matcher.to_s + " " }
+    msg.speak("To address me, type \"#{bot.config['nickname']},\" " +
+        "(minding the comma) followed by a command, or just " +
+        "!command. Available commands: ")
+    msg.paste(commands.to_s)
+    msg.speak("More detail can be found at " +
+        "http://wiki.domain.com/confluence/display/Campfire-bot")
   end
 end
