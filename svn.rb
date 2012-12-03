@@ -15,7 +15,8 @@ class Svn < CampfireBot::Plugin
     # log "initializing... "
     @bot_root = bot.config['bot_root'].nil? ? "/opt/campfire-bot" : \
         bot.config['bot_root']
-    @data_file  = File.join(@bot_root, 'tmp', "svn-#{BOT_ENVIRONMENT}-#{bot.config['room']}.yml")
+    @data_file  = File.join(@bot_root, 'tmp',
+        "svn-#{bot.environment_name}-#{bot.config['room']}.yml")
     @cached_revisions = YAML::load(File.read(@data_file)) rescue {}
     @last_checked ||= 10.minutes.ago
     @urls = bot.config['svn_urls']
